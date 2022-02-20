@@ -1,26 +1,57 @@
 from tkinter import *
+from tkinter import messagebox
+import random
+import pyperclip
 
 # ---------------------------- PASSWORD GENERATOR ------------------------------- #
+def generate_pasword():
+    letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q',
+               'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+               'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+    numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+    symbols = ['!', '#', '$', '%', '&', '(', ')', '*', '+']
+
+    password_letter = [random.choice(letters) for _ in range(random.randint(8, 10))]
+    password_numbers = [random.choice(numbers) for _ in range(random.randint(2, 4))]
+    password_symbols = [random.choice(symbols) for _ in range(random.randint(2, 4))]
+
+    password_list = password_letter + password_numbers + password_symbols
+    random.shuffle(password_list)
+
+    password = "".join(password_list)
+    pass_entry.insert(0, string=password)
+    #pyperclip.copy(password) #to copy the password but doesn't works in Ubuntu
+
 
 # ---------------------------- SAVE PASSWORD ------------------------------- #
 
 #Gets text in entry
-def new_web_address():
+def new_input():
     web_address = web_entry.get()
     mail_address = mail_entry.get()
     password = pass_entry.get()
+    if len(web_address) == 0 or len(password) == 0 or len(mail_address) == 0:
+        messagebox.showerror(title="Epmty Field", message="Please fill all fields")
+        empty_field = True
+        return "", False
 
-    web_entry.delete(0, 'end')
-    mail_entry.delete(0, 'end')
-    mail_entry.insert(0, "bruno.gupa@gmaill.com")
-    pass_entry.delete(0, 'end')
-    return web_address + "   |   " + mail_address + "   |   " + password + "\n"
+    save = messagebox.askokcancel(title="Password Manager", message=f"Are you sure to save the folowiong input?"
+                                                          f" \n web: {web_address} \n user: {mail_address}"
+                                                          f"\n password: {password} ")
+    if save:
+        web_entry.delete(0, 'end')
+        mail_entry.delete(0, 'end')
+        mail_entry.insert(0, "bruno.gupa@gmaill.com")
+        pass_entry.delete(0, 'end')
+    return web_address + "   |   " + mail_address + "   |   " + password + "\n", save
 
 def save_pass():
-    f = open("passwords.txt", "a")
-    string = new_web_address()
-    f.write(string)
-    f.close()
+    string, save = new_input()
+    if save:
+        f = open("passwords.txt", "a")
+        f.write(string)
+        f.close()
+
 
 # ---------------------------- UI SETUP ------------------------------- #
 window = Tk()
@@ -50,7 +81,7 @@ def action():
     pass
 
 #calls action() when pressed
-generate_password = Button(text="New Password", command=action, font=("Arial", 10, "bold"), width=10)
+generate_password = Button(text="New Password", command=generate_pasword, font=("Arial", 10, "bold"), width=10)
 generate_password.grid(row=4, column=2)
 
 add_button = Button(text="Add", command=save_pass, font=("Arial", 12, "bold"), width=30)
@@ -58,22 +89,18 @@ add_button.grid(row=5, column=1, columnspan=2)
 
 
 #Entries
-web_address = StringVar()
-web_entry = Entry(textvariable=web_address, width=37)
+web_entry = Entry(width=37)
 web_entry.grid(row=2, column=1, columnspan=2)
 web_entry.focus() #To focus the cursor in the entry
 
 
-mail_address = StringVar()
-mail_entry = Entry(textvariable=mail_address, width=37)
+mail_entry = Entry(width=37)
 #Add some text to begin with
 mail_entry.insert(0, string="bruno.gupa@gmail.com")
 mail_entry.grid(row=3, column=1, columnspan=2)
 
-password = StringVar()
-pass_entry = Entry(textvariable=password, width=24)
+pass_entry = Entry(width=24)
 pass_entry.grid(row=4, column=1)
-
 
 
 window.mainloop()
