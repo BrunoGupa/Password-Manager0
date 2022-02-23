@@ -1,7 +1,8 @@
 from tkinter import *
 from tkinter import messagebox
 import random
-import pyperclip
+#import pyperclip
+import json
 
 # ---------------------------- PASSWORD GENERATOR ------------------------------- #
 def generate_pasword():
@@ -30,6 +31,13 @@ def new_input():
     web_address = web_entry.get()
     mail_address = mail_entry.get()
     password = pass_entry.get()
+    new_data = {
+        web_address: {
+            "email": mail_address,
+            "password": password,
+        }
+    }
+
     if len(web_address) == 0 or len(password) == 0 or len(mail_address) == 0:
         messagebox.showerror(title="Epmty Field", message="Please fill all fields")
         empty_field = True
@@ -43,15 +51,26 @@ def new_input():
         mail_entry.delete(0, 'end')
         mail_entry.insert(0, "bruno.gupa@gmaill.com")
         pass_entry.delete(0, 'end')
-    return web_address + "   |   " + mail_address + "   |   " + password + "\n", save
+    return new_data, save
+
 
 def save_pass():
-    string, save = new_input()
+    new_data, save = new_input()
     if save:
-        f = open("passwords.txt", "a")
-        f.write(string)
-        f.close()
+        try:
+            with open("data.json", "r") as data_file:
+                #Reading old data
+                data = json.load(data_file)
 
+        except FileNotFoundError:
+            with open("data.json", "w") as data_file:
+                json.dump(new_data, data_file, indent=4)
+        else:
+            #Updating the new data
+            data.update(new_data)
+            with open("data.json", "w") as data_file:
+                #Saving the updated data
+                json.dump(data, data_file, indent=4)
 
 # ---------------------------- UI SETUP ------------------------------- #
 window = Tk()
