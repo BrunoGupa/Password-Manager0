@@ -42,35 +42,64 @@ def new_input():
         messagebox.showerror(title="Epmty Field", message="Please fill all fields")
         empty_field = True
         return "", False
-
-    save = messagebox.askokcancel(title="Password Manager", message=f"Are you sure to save the folowiong input?"
-                                                          f" \n web: {web_address} \n user: {mail_address}"
-                                                          f"\n password: {password} ")
-    if save:
+    else:
         web_entry.delete(0, 'end')
         mail_entry.delete(0, 'end')
         mail_entry.insert(0, "bruno.gupa@gmaill.com")
         pass_entry.delete(0, 'end')
-    return new_data, save
+    return new_data
 
 
 def save_pass():
-    new_data, save = new_input()
-    if save:
-        try:
-            with open("data.json", "r") as data_file:
-                #Reading old data
-                data = json.load(data_file)
+    new_data = new_input()
 
-        except FileNotFoundError:
-            with open("data.json", "w") as data_file:
-                json.dump(new_data, data_file, indent=4)
+    try:
+        with open("data.json", "r") as data_file:
+            #Reading old data
+            data = json.load(data_file)
+
+    except FileNotFoundError:
+        with open("data.json", "w") as data_file:
+            json.dump(new_data, data_file, indent=4)
+    else:
+        #Updating the new data
+        data.update(new_data)
+        with open("data.json", "w") as data_file:
+            #Saving the updated data
+            json.dump(data, data_file, indent=4)
+
+def search_password():
+    web_address = web_entry.get()
+    try:
+        with open("data.json", "r") as data_file:
+            # Reading old data
+            data = json.load(data_file)
+
+    except FileNotFoundError:
+        messagebox.showinfo(title="Password Manager", message=f"Sorry. You don't have any data saved yet.")
+
+
+
+    else:
+        if web_address in data:
+            email = data[web_address]["email"]
+            password = data[web_address]["password"]
+            messagebox.showinfo (title="Password Manager", message=f"Here is your info. \n"
+                                                                   f"E-mail: {email} \n"
+                                                                   f"Password: {password}")
+            web_entry.delete(0, 'end')
+            mail_entry.delete(0, 'end')
+            mail_entry.insert(0, "bruno.gupa@gmaill.com")
+            pass_entry.delete(0, 'end')
+
         else:
-            #Updating the new data
-            data.update(new_data)
-            with open("data.json", "w") as data_file:
-                #Saving the updated data
-                json.dump(data, data_file, indent=4)
+            if len(web_address) == 0:
+                messagebox.showinfo(title="Password Manager", message=f"You must insert an address")
+            else:
+                messagebox.showinfo(title="Password Manager", message=f"Sorry. There's no match with that address.")
+
+
+
 
 # ---------------------------- UI SETUP ------------------------------- #
 window = Tk()
@@ -96,10 +125,11 @@ pass_label.grid(row=4, column=0)
 
 
 #Buttons
-def action():
-    pass
 
 #calls action() when pressed
+search_button = Button(text="Search", command=search_password, font=("Arial", 10, "bold"), width=10)
+search_button.grid(row=2, column=2)
+
 generate_password = Button(text="New Password", command=generate_pasword, font=("Arial", 10, "bold"), width=10)
 generate_password.grid(row=4, column=2)
 
@@ -108,8 +138,8 @@ add_button.grid(row=5, column=1, columnspan=2)
 
 
 #Entries
-web_entry = Entry(width=37)
-web_entry.grid(row=2, column=1, columnspan=2)
+web_entry = Entry(width=24)
+web_entry.grid(row=2, column=1)
 web_entry.focus() #To focus the cursor in the entry
 
 
